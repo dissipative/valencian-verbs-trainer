@@ -26,6 +26,8 @@
     .topbar-inner{min-height:80px;display:flex;align-items:center;justify-content:space-between;gap:16px}
     .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
     .brand-mark{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#6d60f4,#8e7bfa);color:#fff;font-size:25px;font-weight:850;box-shadow:0 6px 15px #6058e83a}
+    .brand-mascot{width:64px;height:58px;object-fit:contain;image-rendering:pixelated;flex-shrink:0}
+    @media(max-width:720px){.brand-mascot{width:52px;height:48px}.brand{gap:8px}}
     .brand-copy{display:flex;flex-direction:column;line-height:1.15}
     .brand-title{font-size:18px;font-weight:800;letter-spacing:-.045em}
     .brand-sub{color:var(--muted);font-size:12px;margin-top:5px}
@@ -152,7 +154,7 @@
   <header class="topbar">
     <div class="wrap topbar-inner">
       <a class="brand" href="#" aria-label="Главная страница тренажёра">
-        <span class="brand-mark">V</span>
+        <img class="brand-mascot" src="./guinea-pig.png" width="64" height="58" alt="Пиксельная морская свинка">
         <span class="brand-copy"><span class="brand-title">Verbs <span style="color:#6b60e9">·</span> Lab</span><span class="brand-sub">Валенсийский · 3 глагола · 90 форм</span></span>
       </a>
       <span class="local" id="storage-status">● Прогресс сохраняется в браузере</span>
