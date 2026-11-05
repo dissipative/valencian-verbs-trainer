@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f8fd">
+  <meta name="description" content="Тренажёр 90 форм валенсийских глаголов estar, anar и posar: тесты, проценты, повторение ошибок и история обучения.">
+  <title>Verbs · Тренажёр валенсийского</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg:#f7f8fd;--paper:#fff;--text:#19223b;--muted:#69738c;
+      --line:#e5e8f1;--accent:#6058e8;--accent-hover:#4942c8;
+      --accent-light:#efedff;--green:#168a68;--green-bg:#e8f8f1;
+      --red:#ca4956;--red-bg:#fff0f0;--shadow:0 10px 36px rgba(44,50,104,.065);
+      --radius:20px;
+    }
+    * {box-sizing:border-box}
+    html {scroll-behavior:smooth}
+    body {margin:0;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased}
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    button:focus-visible,select:focus-visible{outline:3px solid #b4aefd;outline-offset:3px}
+    .wrap{width:min(1060px,calc(100% - 40px));margin:0 auto}
+    .topbar{background:#fff;border-bottom:1px solid var(--line)}
+    .topbar-inner{min-height:80px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+    .brand-mark{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#6d60f4,#8e7bfa);color:#fff;font-size:25px;font-weight:850;box-shadow:0 6px 15px #6058e83a}
+    .brand-copy{display:flex;flex-direction:column;line-height:1.15}
+    .brand-title{font-size:18px;font-weight:800;letter-spacing:-.045em}
+    .brand-sub{color:var(--muted);font-size:12px;margin-top:5px}
+    .local{color:var(--green);font-size:12px;font-weight:700;white-space:nowrap}
+    main{padding:36px 0 56px}
+    h1,h2,h3,p{margin-top:0}
+    h1{font-size:clamp(27px,4.5vw,40px);line-height:1.14;letter-spacing:-.055em;margin-bottom:10px}
+    h2{font-size:21px;letter-spacing:-.035em;margin-bottom:7px}
+    h3{font-size:16px;letter-spacing:-.02em;margin:0 0 5px}
+    .muted{color:var(--muted)}
+    .intro{max-width:700px;margin-bottom:25px}
+    .intro p{color:var(--muted);font-size:15px;margin-bottom:0}
+    .stats-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin:24px 0}
+    .stat{background:var(--paper);border:1px solid var(--line);border-radius:19px;padding:22px;box-shadow:var(--shadow)}
+    .stat-label{color:var(--muted);font-size:13px;font-weight:600}
+    .stat-value{font-size:clamp(27px,4vw,36px);font-weight:850;letter-spacing:-.05em;margin:5px 0 1px;font-variant-numeric:tabular-nums}
+    .stat-foot{color:var(--muted);font-size:12px}
+    .stat strong{color:var(--accent)}
+    .nav{display:flex;gap:6px;padding:5px;background:#eff0f7;border:1px solid #e8e9f1;border-radius:15px;width:max-content;max-width:100%;margin:0 0 20px;overflow-x:auto}
+    .nav button{border:none;background:transparent;color:#677089;border-radius:11px;padding:10px 18px;font-weight:750;font-size:14px;white-space:nowrap}
+    .nav button.active{background:#fff;color:var(--text);box-shadow:0 2px 7px #17204715}
+    .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:27px}
+    .card + .card{margin-top:16px}
+    .card-title-row,.row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .card-title-row{margin-bottom:18px}
+    .pill{background:#f2f2ff;color:#5a50cf;border-radius:99px;padding:6px 10px;font-size:12px;font-weight:750;white-space:nowrap}
+    .progress-track{height:9px;background:#e9eaf3;border-radius:99px;overflow:hidden}
+    .progress-bar{height:100%;background:linear-gradient(90deg,#7669f3,#9e88f4);border-radius:inherit;transition:width .28s ease}
+    .progress-meta{display:flex;justify-content:space-between;gap:10px;margin:0 0 10px;font-size:13px;color:var(--muted)}
+    .question{padding:34px 10px 27px;text-align:center}
+    .eyebrow{text-transform:uppercase;letter-spacing:.15em;font-size:11px;font-weight:850;color:#837bde;margin-bottom:11px}
+    .verb{font-size:clamp(40px,7vw,58px);letter-spacing:-.065em;line-height:1.1;font-weight:900;margin:0 0 21px}
+    .chips{display:flex;justify-content:center;flex-wrap:wrap;gap:9px}
+    .chip{background:#f2f3f9;border:1px solid #e8e9f3;border-radius:10px;padding:7px 13px;font-weight:750;font-size:14px}
+    .options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+    .option{display:flex;align-items:center;gap:14px;text-align:left;padding:16px;border:1.5px solid #dfe3ee;background:#fff;border-radius:14px;min-height:70px;transition:border-color .15s,background .15s,transform .15s}
+    .option:not(:disabled):hover{border-color:#958def;background:#faf9ff;transform:translateY(-1px)}
+    .option:disabled{cursor:default}
+    .option .letter{border:1px solid #dfe2ed;border-radius:9px;min-width:32px;height:32px;display:grid;place-items:center;font-size:13px;font-weight:800;color:#727b94}
+    .option .word{font-size:19px;font-weight:700;letter-spacing:-.02em}
+    .option.correct{border-color:#2ba27c;background:var(--green-bg)}
+    .option.correct .letter{color:var(--green);border-color:#a4d8c2}
+    .option.wrong{border-color:#e38891;background:var(--red-bg)}
+    .option.wrong .letter{color:var(--red);border-color:#e9b7bb}
+    .option .marker{margin-left:auto;font-weight:900;color:var(--green);font-size:18px}
+    .option.wrong .marker{color:var(--red)}
+    .feedback{margin-top:17px;padding:14px 16px;border-radius:12px;font-size:14px}
+    .feedback.good{background:var(--green-bg);color:#13684f}
+    .feedback.bad{background:var(--red-bg);color:#9e3c44}
+    .feedback strong{display:block;font-size:15px;margin-bottom:2px}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;margin-top:22px}
+    .btn{border:none;border-radius:11px;padding:12px 18px;font-size:14px;font-weight:800;transition:background .15s,transform .15s}
+    .btn:active{transform:scale(.985)}
+    .primary{background:var(--accent);color:#fff}
+    .primary:hover{background:var(--accent-hover)}
+    .secondary{background:var(--accent-light);color:#554bc4}
+    .secondary:hover{background:#e5e1ff}
+    .quiet{background:#f1f3f8;color:#526078}
+    .quiet:hover{background:#e9ecf5}
+    .danger{background:#fff0f0;color:#a03f47}
+    .danger:hover{background:#ffe4e5}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .help{color:#8891a6;font-size:12px;margin-top:19px}
+    .banner{border:1px solid #e1dcff;background:linear-gradient(110deg,#f3f0ff,#fbfaff);border-radius:16px;padding:17px 20px;margin:0 0 17px;color:#514bb1;font-size:14px}
+    .banner strong{color:#3f3a98}
+    .result{padding:30px 5px;text-align:center}
+    .result-disc{width:168px;height:168px;border-radius:50%;display:grid;place-items:center;margin:20px auto 21px;position:relative;background:conic-gradient(var(--accent) var(--pct),#edeaf9 0)}
+    .result-disc:after{content:"";position:absolute;inset:12px;border-radius:50%;background:#fff}
+    .result-number{position:relative;z-index:1;font-weight:900;letter-spacing:-.06em;font-size:40px}
+    .result h2{font-size:26px}
+    .result p{margin-bottom:6px;color:var(--muted)}
+    .completion-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:26px auto;max-width:600px}
+    .completion-grid div{background:#f6f7fb;border-radius:13px;padding:13px 9px}
+    .completion-grid strong{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+    .completion-grid span{font-size:12px;color:var(--muted)}
+    .center-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:11px}
+    .section-lead{color:var(--muted);font-size:14px;margin-bottom:20px}
+    .legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--muted);margin-bottom:12px}
+    .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+    .bars{min-height:205px;display:flex;align-items:end;gap:10px;border-bottom:1px solid var(--line);padding:28px 2px 0;overflow-x:auto}
+    .bar-group{min-width:45px;flex:1;max-width:88px;display:flex;flex-direction:column;align-items:center;justify-content:end;gap:6px}
+    .bar-percent{font-size:12px;color:#4d5872;font-weight:750}
+    .bar{width:65%;min-width:21px;max-width:44px;border-radius:9px 9px 0 0;background:linear-gradient(180deg,#776af5,#a49cff);min-height:3px}
+    .bar-label{font-size:11px;color:var(--muted);padding-top:8px}
+    .stats-detail{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}
+    .small-panel{border:1px solid var(--line);border-radius:13px;padding:15px}
+    .small-panel .count{font-size:26px;font-weight:850;letter-spacing:-.04em;margin-top:3px}
+    .matrix{border-collapse:collapse;width:100%;font-size:13px;margin-top:12px}
+    .matrix th,.matrix td{border-bottom:1px solid var(--line);padding:11px 8px;text-align:center}
+    .matrix th:first-child,.matrix td:first-child{text-align:left;font-weight:700}
+    .matrix th{color:var(--muted);font-weight:700}
+    .matrix .high{color:#087b56;font-weight:800}
+    .matrix .medium{color:#a16b24;font-weight:800}
+    .matrix .low{color:#b74955;font-weight:800}
+    .table-scroll{overflow-x:auto}
+    .select-row{display:flex;flex-wrap:wrap;gap:9px;margin:18px 0}
+    .seg{border:1px solid var(--line);background:#fff;color:#626c84;font-weight:800;padding:9px 15px;border-radius:10px}
+    .seg.active{background:var(--accent-light);border-color:#c9c2ff;color:#554bc4}
+    .reference{width:100%;border-collapse:collapse;font-size:14px}
+    .reference th,.reference td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+    .reference th{color:var(--muted);font-weight:750;font-size:12px}
+    .reference tr:last-child td{border-bottom:none}
+    .reference tr:nth-child(even) td{background:#fafbfe}
+    .note{background:#f5f6fa;border-radius:13px;padding:15px 17px;font-size:13px;color:#667189;line-height:1.65}
+    .empty{color:var(--muted);padding:28px 0;text-align:center}
+    footer{color:#858ea3;font-size:12px;margin-top:25px;text-align:center}
+    @media(max-width:720px){
+      .wrap{width:min(100% - 24px,1060px)}main{padding:25px 0 35px}
+      .topbar-inner{min-height:70px}.local{display:none}
+      .stats-grid{gap:9px}.stat{padding:15px 11px;border-radius:14px}.stat-label{font-size:11px;min-height:33px}.stat-value{font-size:26px}.stat-foot{font-size:10px}
+      .card{padding:19px;border-radius:17px}.card-title-row{align-items:flex-start}.question{padding:27px 0 23px}
+      .options{grid-template-columns:1fr;gap:9px}.option{min-height:62px;padding:12px 14px}
+      .option .word{font-size:18px}.actions>.btn{flex:1}.completion-grid{gap:7px}
+      .stats-detail{gap:7px}.small-panel{padding:12px 9px}.small-panel h3{font-size:12px}.small-panel .count{font-size:23px}
+      .matrix{font-size:11px}.matrix th,.matrix td{padding:9px 5px}
+      .nav{width:100%;overflow:visible;gap:3px}
+      .nav button{flex:1;font-size:12px;padding:10px 5px}
+      .btn{padding:12px 14px}
+    }
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#" aria-label="Главная страница тренажёра">
+        <span class="brand-mark">V</span>
+        <span class="brand-copy"><span class="brand-title">Verbs <span style="color:#6b60e9">·</span> Lab</span><span class="brand-sub">Валенсийский · 3 глагола · 90 форм</span></span>
+      </a>
+      <span class="local" id="storage-status">● Прогресс сохраняется в браузере</span>
+    </div>
+  </header>
+  <main class="wrap" id="app" aria-live="polite"></main>
+  <footer class="wrap">Тренажёр работает без интернета. Все данные хранятся только в этом браузере.</footer>
+  <script>
+  (() => {
+    'use strict';
+    const KEY = 'valencian-verbs-lab-state-v1';
+    const PERSONS = ['jo', 'tu', 'ell / ella', 'nosaltres', 'vosaltres', 'ells / elles'];
+    const TENSES = ['Present', 'Imperfet', 'Passat simple', 'Futur', 'Condicional'];
+    const VERBS = [
+      {name:'ESTAR',translation:'быть, находиться',forms:[
+        ['estic','estàs','està','estem','esteu','estan'],
+        ['estava','estaves','estava','estàvem','estàveu','estaven'],
+        ['estiguí','estigueres','estigué','estiguérem','estiguéreu','estigueren'],
+        ['estaré','estaràs','estarà','estarem','estareu','estaran'],
+        ['estaria','estaries','estaria','estaríem','estaríeu','estarien']
+      ]},
+      {name:'ANAR',translation:'идти, ехать',forms:[
+        ['vaig','vas','va','anem','aneu','van'],
+        ['anava','anaves','anava','anàvem','anàveu','anaven'],
+        ['aní','anares','anà','anàrem','anàreu','anaren'],
+        ['aniré','aniràs','anirà','anirem','anireu','aniran'],
+        ['aniria','aniries','aniria','aniríem','aniríeu','anirien']
+      ]},
+      {name:'POSAR',translation:'ставить, класть',forms:[
+        ['pose','poses','posa','posem','poseu','posen'],
+        ['posava','posaves','posava','posàvem','posàveu','posaven'],
+        ['posí','posares','posà','posàrem','posàreu','posaren'],
+        ['posaré','posaràs','posarà','posarem','posareu','posaran'],
+        ['posaria','posaries','posaria','posaríem','posaríeu','posarien']
+      ]}
+    ];
+    const IDS = Array.from({length:90},(_,i)=>i);
+    const app = document.getElementById('app');
+    let canStore = true;
+    let state;
+    let tab = 'train';
+    let referenceVerb = 0;
+    const round2 = n => Math.round(n*10)/10;
+    const percent = (a,b) => b ? round2(a*100/b) : 0;
+    const form = id => VERBS[Math.floor(id/30)].forms[Math.floor((id%30)/6)][id%6];
+    const details = id => ({verb:Math.floor(id/30),tense:Math.floor((id%30)/6),person:id%6});
+    const shuffle = items => {
+      const result = items.slice();
+      for(let i=result.length-1;i>0;i--) {const j=Math.floor(Math.random()*(i+1));[result[i],result[j]]=[result[j],result[i]];}
+      return result;
+    };
+    const emptyState = () => ({version:1,history:[],streaks:Array(90).fill(0),session:null,lastMistakes:[]});
+    const save = () => {
+      if(!canStore) return;
+      try {localStorage.setItem(KEY,JSON.stringify(state));}
+      catch {canStore=false;updateStorageStatus();}
+    };
+    const updateStorageStatus = () => {
+      const el = document.getElementById('storage-status');
+      if(el) {el.textContent=canStore?'● Прогресс сохраняется в браузере':'● Сохранение недоступно';el.style.color=canStore?'var(--green)':'var(--red)';}
+    };
+    function load() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if(raw) {
+          const parsed=JSON.parse(raw);
+          if(parsed && parsed.version===1 && Array.isArray(parsed.streaks) && parsed.streaks.length===90 && Array.isArray(parsed.history)) return parsed;
+        }
+      } catch {canStore=false;}
+      return emptyState();
+    }
+    function makeOptions(id) {
+      const {verb,tense,person}=details(id), target=form(id);
+      const groups=[[],[],[],[]];
+      for(let p=0;p<6;p++) if(p!==person) groups[0].push(VERBS[verb].forms[tense][p]);
+      for(let t=0;t<5;t++) if(t!==tense) groups[1].push(VERBS[verb].forms[t][person]);
+      for(let t=0;t<5;t++) for(let p=0;p<6;p++) if(t!==tense&&p!==person) groups[2].push(VERBS[verb].forms[t][p]);
+      for(let v=0;v<3;v++) if(v!==verb) for(let t=0;t<5;t++) for(let p=0;p<6;p++) groups[3].push(VERBS[v].forms[t][p]);
+      const chosen=[];
+      for(const group of groups){
+        for(const candidate of shuffle(group)) {
+          if(candidate!==target && !chosen.includes(candidate)) {chosen.push(candidate);break;}
+        }
+        if(chosen.length===3) break;
+      }
+      if(chosen.length!==3) throw new Error('Невозможно составить четыре уникальных варианта');
+      return shuffle([target,...chosen]);
+    }
+    function begin(mode='full',ids=IDS) {
+      const existing=state.session;
+      if(existing && !existing.complete && Object.keys(existing.answers).length>0 && !window.confirm('Текущий раунд не закончен. Начать новый?')) return;
+      const order=shuffle(ids);
+      const options={};
+      for(const id of order) options[id]=makeOptions(id);
+      state.session={mode,order,options,idx:0,answers:{},complete:false,started:new Date().toISOString()};
+      tab='train';save();render();window.scrollTo({top:0,behavior:'smooth'});
+    }
+    function resultOf(session) {
+      return session.order.reduce((acc,id)=>acc+Number(!!session.answers[id]?.correct),0);
+    }
+    function finish() {
+      const session=state.session;
+      if(!session || session.complete) return;
+      const score=resultOf(session);
+      const mistakes=session.order.filter(id=>!session.answers[id]?.correct);
+      const record={mode:session.mode,score,total:session.order.length,mistakes,answers:session.answers,at:new Date().toISOString()};
+      state.history.push(record);
+      if(state.history.length>150) state.history.shift();
+      if(session.mode==='full') {
+        state.lastMistakes=mistakes.slice();
+        for(const id of IDS) state.streaks[id]=session.answers[id]?.correct ? Math.min(99,(state.streaks[id]||0)+1) : 0;
+      }
+      session.complete=true;
+      session.summary=record;
+      save();render();
+    }
+    function choose(optionIndex) {
+      const session=state.session;
+      if(tab!=='train'||!session||session.complete) return;
+      const id=session.order[session.idx];
+      if(id===undefined||session.answers[id]) return;
+      const choice=session.options[id]?.[optionIndex];
+      if(typeof choice!=='string') return;
+      session.answers[id]={selected:choice,correct:choice===form(id)};
+      save();render();
+    }
+    function next() {
+      const session=state.session;
+      if(!session||session.complete) return;
+      const id=session.order[session.idx];
+      if(!session.answers[id]) return;
+      session.idx++;
+      if(session.idx===session.order.length) finish();
+      else {save();render();}
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    function lastFull() {return state.history.slice().reverse().find(r=>r.mode==='full');}
+    function mastered() {return state.streaks.filter(n=>n>=2).length;}
+    function cards() {
+      const last=lastFull();
+      const full=state.history.filter(h=>h.mode==='full');
+      const best=full.length?Math.max(...full.map(x=>percent(x.score,x.total))):null;
+      return `<section class="stats-grid" aria-label="Основные показатели">
+        <div class="stat"><div class="stat-label">Последний полный круг</div><div class="stat-value">${last?percent(last.score,90)+'%':'—'}</div><div class="stat-foot">${last?last.score+' из 90 правильных':'Пока нет результатов'}</div></div>
+        <div class="stat"><div class="stat-label">Уверенно выучено</div><div class="stat-value"><strong>${percent(mastered(),90)}%</strong></div><div class="stat-foot">${mastered()} из 90 · два круга подряд</div></div>
+        <div class="stat"><div class="stat-label">Лучший результат</div><div class="stat-value">${best===null?'—':best+'%'}</div><div class="stat-foot">${full.length} полных ${full.length===1?'круг':full.length<5?'круга':'кругов'}</div></div>
+      </section>`;
+    }
+    function navigation() {
+      return `<nav class="nav" aria-label="Разделы">
+        <button data-tab="train" class="${tab==='train'?'active':''}" aria-current="${tab==='train'?'page':'false'}">Тренировка</button>
+        <button data-tab="stats" class="${tab==='stats'?'active':''}" aria-current="${tab==='stats'?'page':'false'}">Статистика</button>
+        <button data-tab="reference" class="${tab==='reference'?'active':''}" aria-current="${tab==='reference'?'page':'false'}">Таблицы форм</button>
+      </nav>`;
+    }
+    function trainView() {
+      const s=state.session;
+      if(!s) return `<section class="card"><h2>Начнём тренировку</h2><p class="muted">Один круг — 90 случайных вопросов с четырьмя вариантами ответа.</p><button class="btn primary" data-action="start-full">Начать круг из 90 вопросов →</button></section>`;
+      if(s.complete) return completedView(s);
+      const id=s.order[s.idx], {verb,tense,person}=details(id);
+      const answer=s.answers[id], n=Object.keys(s.answers).length, done=resultOf(s), remaining=s.order.length-s.idx;
+      const opts=s.options[id].map((choice,i)=>{
+        const mark=answer && choice===form(id) ? ' correct' : answer && choice===answer.selected ? ' wrong' : '';
+        const symbol=answer && choice===form(id) ? '<span class="marker" aria-hidden="true">✓</span>' : answer && choice===answer.selected ? '<span class="marker" aria-hidden="true">✕</span>' : '';
+        return `<button class="option${mark}" data-choice="${i}" ${answer?'disabled':''} aria-label="Вариант ${i+1}: ${choice}"><span class="letter">${i+1}</span><span class="word">${choice}</span>${symbol}</button>`;
+      }).join('');
+      const label=s.mode==='full'?'Полный круг · 90 форм':'Повторение ошибок';
+      return `<section class="card">
+        <div class="card-title-row"><div><h2>Выбери правильную форму</h2><div class="muted" style="font-size:13px">${label}</div></div><span class="pill">Вопрос ${s.idx+1} / ${s.order.length}</span></div>
+        <div class="progress-meta"><span>Пройдено: ${n} из ${s.order.length}</span><span>Правильно: ${done}${n?' ('+percent(done,n)+'%)':''}</span></div>
+        <div class="progress-track" role="progressbar" aria-valuenow="${n}" aria-valuemin="0" aria-valuemax="${s.order.length}" aria-label="Прогресс раунда"><div class="progress-bar" style="width:${percent(n,s.order.length)}%"></div></div>
+        <div class="question"><div class="eyebrow">Quina és la forma correcta?</div><div class="verb">${VERBS[verb].name}</div><div class="chips"><span class="chip">${TENSES[tense]}</span><span class="chip">${PERSONS[person]}</span></div></div>
+        <div class="options">${opts}</div>
+        ${answer?`<div class="feedback ${answer.correct?'good':'bad'}" role="status"><strong>${answer.correct?'✓ Правильно!':'✕ Правильный ответ: '+form(id)}</strong>${VERBS[verb].name.toLowerCase()} · ${TENSES[tense]} · ${PERSONS[person]} → ${form(id)}</div>`:''}
+        <div class="actions"><button class="btn quiet" data-action="start-full">↻ Начать новый круг</button>${s.mode==='full'&&state.lastMistakes.length?`<button class="btn secondary" data-action="review">Ошибки прошлого круга (${state.lastMistakes.length})</button>`:''}${answer?`<button class="btn primary" data-action="next">${remaining===1?'Завершить раунд':'Следующий вопрос'} →</button>`:''}</div>
+        <p class="help">Быстрые клавиши: 1–4 для ответа, Enter для следующего вопроса. Результаты сохраняются автоматически.</p>
+      </section>`;
+    }
+    function completedView(s) {
+      const r=s.summary, p=percent(r.score,r.total), full=s.mode==='full', reached=r.score>=Math.ceil(.9*r.total);
+      const message=full?(reached?'Отлично! Порог 90% достигнут.':'Продолжайте тренироваться: цель — минимум 81 правильный ответ из 90.'):'Повторение завершено. Ошибки полезно ещё раз проверить в полном круге.';
+      return `<section class="card result" aria-live="polite">
+        <span class="pill">${full?'Полный круг завершён':'Работа над ошибками завершена'}</span>
+        <div class="result-disc" style="--pct:${p}%"><span class="result-number">${p}%</span></div>
+        <h2>${full?(reached?'Цель 90% достигнута!':'Раунд завершён!'):'Повторение завершено!'}</h2>
+        <p>${message}</p>
+        <div class="completion-grid"><div><strong>${r.score}</strong><span>Правильно</span></div><div><strong>${r.mistakes.length}</strong><span>Ошибок</span></div><div><strong>${mastered()} / 90</strong><span>Уверенно выучено</span></div></div>
+        <div class="center-actions">${r.mistakes.length?`<button class="btn secondary" data-action="review-current">Повторить ${r.mistakes.length} ошибок</button>`:''}<button class="btn primary" data-action="start-full">Новый круг из 90 →</button><button class="btn quiet" data-tab="stats">Посмотреть статистику</button></div>
+        <div class="note" style="text-align:left;margin:26px 0 0"><strong>Что означают проценты?</strong> Результат раунда — доля верных ответов с первой попытки. Показатель «уверенно выучено» увеличивается, только если форма верно выбрана в двух последовательных <em>полных</em> кругах. Повторение ошибок не меняет этот показатель.</div>
+      </section>`;
+    }
+    function statsView() {
+      const full=state.history.filter(h=>h.mode==='full');
+      const last=lastFull();
+      const one=state.streaks.filter(n=>n===1).length, masteredCount=mastered(), unseen=90-one-masteredCount;
+      const recent=full.slice(-12);
+      const bars=recent.map((r,i)=>{
+        const p=percent(r.score,90);
+        return `<div class="bar-group" title="Круг ${full.length-recent.length+i+1}: ${p}%"><div class="bar-percent">${p}%</div><div class="bar" style="height:${Math.max(3,p*1.5)}px"></div><div class="bar-label">№${full.length-recent.length+i+1}</div></div>`;
+      }).join('');
+      let matrix='<div class="empty">Закончите первый полный круг, чтобы увидеть слабые места.</div>';
+      if(last) {
+        matrix=`<div class="table-scroll"><table class="matrix"><thead><tr><th>Глагол</th>${TENSES.map(t=>`<th>${t}</th>`).join('')}</tr></thead><tbody>${VERBS.map((v,vi)=>`<tr><td>${v.name}</td>${TENSES.map((t,ti)=>{const n=Array.from({length:6},(_,pi)=>vi*30+ti*6+pi).filter(id=>last.answers[id]?.correct).length;const rate=percent(n,6);return `<td class="${rate>=85?'high':rate>=65?'medium':'low'}">${n}/6</td>`;}).join('')}</tr>`).join('')}</tbody></table></div>`;
+      }
+      return `<section class="card"><h2>История результатов</h2><p class="section-lead">Каждый столбик — точность одного полного круга из 90 вопросов. Цель — 90% и выше (81/90).</p>${recent.length?`<div class="bars">${bars}</div><p class="help">Показаны последние ${recent.length} из ${full.length} полных кругов.</p>`:'<div class="empty">Пока нет завершённых кругов. Начните тренировку!</div>'}</section>
+      <section class="card"><h2>Насколько хорошо выучены формы?</h2><p class="section-lead">Чтобы форма считалась выученной, нужно ответить на неё правильно в двух полных кругах подряд.</p>
+        <div class="stats-detail"><div class="small-panel"><h3>✓ Выучено</h3><div class="count" style="color:var(--green)">${masteredCount}</div><span class="muted" style="font-size:12px">2+ круга подряд</span></div><div class="small-panel"><h3>◐ Закрепляется</h3><div class="count" style="color:var(--accent)">${one}</div><span class="muted" style="font-size:12px">1 правильный круг</span></div><div class="small-panel"><h3>○ Нужно повторить</h3><div class="count" style="color:var(--red)">${unseen}</div><span class="muted" style="font-size:12px">Нет серии</span></div></div>
+        <div class="progress-track" style="margin-top:20px"><div class="progress-bar" style="width:${percent(masteredCount,90)}%;background:var(--green)"></div></div><div class="progress-meta" style="margin-top:10px"><span>${masteredCount} / 90 выучено</span><strong>${percent(masteredCount,90)}%</strong></div>
+      </section>
+      <section class="card"><h2>Последний полный круг: где ошибки?</h2><p class="section-lead">Сколько правильных ответов из 6 было по каждому глаголу и времени.</p>${matrix}
+      <div class="actions"><button class="btn primary" data-action="start-full">Новый полный круг →</button>${state.lastMistakes.length?`<button class="btn secondary" data-action="review">Повторить ошибки (${state.lastMistakes.length})</button>`:''}</div></section>
+      <section class="card"><h2>Управление данными</h2><p class="section-lead">История хранится локально в этом браузере. При очистке данных сайта она может исчезнуть.</p><button class="btn danger" data-action="reset">Удалить всю статистику</button></section>`;
+    }
+    function referenceView() {
+      const v=VERBS[referenceVerb];
+      return `<section class="card"><h2>Все формы для повторения</h2><p class="section-lead">Валенсийский вариант, изъявительное наклонение. Выберите глагол и посмотрите формы по временам.</p>
+      <div class="select-row">${VERBS.map((x,i)=>`<button class="seg ${i===referenceVerb?'active':''}" data-verb="${i}">${x.name}</button>`).join('')}</div><p class="muted" style="font-size:14px;margin-bottom:15px">${v.name} — ${v.translation}</p>
+      <div class="table-scroll"><table class="reference"><thead><tr><th>Persona</th>${TENSES.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${PERSONS.map((p,i)=>`<tr><td><strong>${p}</strong></td>${TENSES.map((t,j)=>`<td>${v.forms[j][i]}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+      <div class="note" style="margin-top:22px">Обратите внимание на ударения. В тесте формы с диакритическими знаками считаются отдельными написаниями. <strong>Passat simple</strong> здесь не заменяется на <em>passat perifràstic</em>: это разные конструкции.</div>
+      <div class="actions"><button class="btn primary" data-tab="train">Перейти к тренировке →</button></div></section>`;
+    }
+    function render() {
+      const finished=state.session?.complete;
+      app.innerHTML=`<section class="intro"><h1>90 форм. Одна понятная цель.</h1><p>Тренируйте <strong>estar, anar и posar</strong> в пяти временах. После каждого круга узнавайте процент правильных ответов и отслеживайте, что уже закрепилось.</p></section>
+        ${cards()}${navigation()}${tab==='train'?trainView():tab==='stats'?statsView():referenceView()}`;
+      document.title=finished&&tab==='train'?'Результат '+percent(state.session.summary.score,state.session.summary.total)+'% · Verbs Lab':'Verbs · Тренажёр валенсийского';
+      updateStorageStatus();
+    }
+    app.addEventListener('click',event=>{
+      const elem=event.target.closest('[data-action],[data-tab],[data-choice],[data-verb]');
+      if(!elem) return;
+      if(elem.dataset.tab){tab=elem.dataset.tab;render();window.scrollTo({top:0,behavior:'smooth'});return;}
+      if(elem.dataset.verb!==undefined){referenceVerb=Number(elem.dataset.verb);render();return;}
+      if(elem.dataset.choice!==undefined){choose(Number(elem.dataset.choice));return;}
+      switch(elem.dataset.action){
+        case 'start-full':begin('full',IDS);break;
+        case 'next':next();break;
+        case 'review':if(state.lastMistakes.length)begin('review',state.lastMistakes);break;
+        case 'review-current':if(state.session?.summary?.mistakes.length)begin('review',state.session.summary.mistakes);break;
+        case 'reset':
+          if(window.confirm('Удалить все результаты и начатые тренировки в этом браузере?')){state=emptyState();save();begin('full',IDS);}break;
+      }
+    });
+    document.addEventListener('keydown',event=>{
+      if(tab!=='train'||event.altKey||event.ctrlKey||event.metaKey||event.target?.matches('input,textarea,select'))return;
+      const s=state.session;if(!s||s.complete)return;
+      if(['1','2','3','4'].includes(event.key)) {event.preventDefault();choose(Number(event.key)-1);}
+      else if(event.key==='Enter'&&s.answers[s.order[s.idx]]){event.preventDefault();next();}
+    });
+    state=load();
+    if(!state.session || !Array.isArray(state.session.order) || !Array.isArray(state.session.options && Object.keys(state.session.options))) {
+      state.session=null;
+      begin('full',IDS);
+    } else {render();}
+  })();
+  </script>
+</body>
+</html>
