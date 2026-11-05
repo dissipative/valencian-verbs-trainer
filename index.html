@@ -277,7 +277,7 @@
       const choice=session.options[id]?.[optionIndex];
       if(typeof choice!=='string') return;
       session.answers[id]={selected:choice,correct:choice===form(id)};
-      save();render();
+      save();render({preserveScroll:true});
     }
     function next() {
       const session=state.session;
@@ -286,8 +286,7 @@
       if(!session.answers[id]) return;
       session.idx++;
       if(session.idx===session.order.length) finish();
-      else {save();render();}
-      window.scrollTo({top:0,behavior:'smooth'});
+      else {save();render({preserveScroll:true});}
     }
     function lastFull() {return state.history.slice().reverse().find(r=>r.mode==='full');}
     function mastered() {return state.streaks.filter(n=>n>=2).length;}
@@ -374,12 +373,15 @@
       <div class="note" style="margin-top:22px">Обратите внимание на ударения. В тесте формы с диакритическими знаками считаются отдельными написаниями. <strong>Passat simple</strong> здесь не заменяется на <em>passat perifràstic</em>: это разные конструкции.</div>
       <div class="actions"><button class="btn primary" data-tab="train">Перейти к тренировке →</button></div></section>`;
     }
-    function render() {
+    function render({preserveScroll=false}={}) {
+      // Replacing the focused answer button can reset the viewport on mobile.
+      const scrollPosition=preserveScroll?{left:window.scrollX,top:window.scrollY}:null;
       const finished=state.session?.complete;
       app.innerHTML=`<section class="intro"><h1>90 форм. Одна понятная цель.</h1><p>Тренируйте <strong>estar, anar и posar</strong> в пяти временах. После каждого круга узнавайте процент правильных ответов и отслеживайте, что уже закрепилось.</p></section>
         ${cards()}${navigation()}${tab==='train'?trainView():tab==='stats'?statsView():referenceView()}`;
       document.title=finished&&tab==='train'?'Результат '+percent(state.session.summary.score,state.session.summary.total)+'% · Verbs Lab':'Verbs · Тренажёр валенсийского';
       updateStorageStatus();
+      if(scrollPosition) window.scrollTo({...scrollPosition,behavior:'instant'});
     }
     app.addEventListener('click',event=>{
       const elem=event.target.closest('[data-action],[data-tab],[data-choice],[data-verb]');
