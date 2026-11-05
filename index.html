@@ -208,7 +208,7 @@
       for(let i=result.length-1;i>0;i--) {const j=Math.floor(Math.random()*(i+1));[result[i],result[j]]=[result[j],result[i]];}
       return result;
     };
-    const emptyState = () => ({version:1,history:[],streaks:Array(90).fill(0),session:null,lastMistakes:[]});
+    const emptyState = () => ({version:1,history:[],streaks:Array(90).fill(0),session:null,lastMistakes:[],recentAnswers:[],totalAnswered:0,bestRolling:null});
     const save = () => {
       if(!canStore) return;
       try {localStorage.setItem(KEY,JSON.stringify(state));}
@@ -247,7 +247,7 @@
     }
     function begin(mode='full',ids=IDS) {
       const existing=state.session;
-      if(existing && !existing.complete && Object.keys(existing.answers).length>0 && !window.confirm('Текущий раунд не закончен. Начать новый?')) return;
+      if(existing && !existing.complete && Object.keys(existing.answers).length>0 && !window.confirm('Перемешать вопросы и начать новый блок? Общий счётчик и точность сохранятся.')) return;
       const order=shuffle(ids);
       const options={};
       for(const id of order) options[id]=makeOptions(id);
@@ -271,7 +271,12 @@
       }
       session.complete=true;
       session.summary=record;
-      save();render();
+      if(session.mode==='full') {
+        const order=shuffle(IDS),options={};
+        for(const id of order) options[id]=makeOptions(id);
+        state.session={mode:'full',order,options,idx:0,answers:{},complete:false,started:new Date().toISOString()};
+      }
+      save();render({preserveScroll:true});
     }
     function choose(optionIndex) {
       const session=state.session;
@@ -281,6 +286,15 @@
       const choice=session.options[id]?.[optionIndex];
       if(typeof choice!=='string') return;
       session.answers[id]={selected:choice,correct:choice===form(id)};
+      if(session.mode==='full') {
+        state.totalAnswered++;
+        state.recentAnswers.push(session.answers[id].correct);
+        state.recentAnswers=state.recentAnswers.slice(-90);
+        if(state.recentAnswers.length===90) {
+          const accuracy=percent(state.recentAnswers.filter(Boolean).length,90);
+          state.bestRolling=state.bestRolling===null?accuracy:Math.max(state.bestRolling,accuracy);
+        }
+      }
       save();render({preserveScroll:true});
     }
     function next() {
@@ -294,14 +308,16 @@
     }
     function lastFull() {return state.history.slice().reverse().find(r=>r.mode==='full');}
     function mastered() {return state.streaks.filter(n=>n>=2).length;}
+    function rollingScore() {
+      const total=state.recentAnswers.length,correct=state.recentAnswers.filter(Boolean).length;
+      return {total,correct,rate:percent(correct,total)};
+    }
     function cards() {
-      const last=lastFull();
-      const full=state.history.filter(h=>h.mode==='full');
-      const best=full.length?Math.max(...full.map(x=>percent(x.score,x.total))):null;
+      const rolling=rollingScore();
       return `<section class="stats-grid" aria-label="Основные показатели">
-        <div class="stat"><div class="stat-label">Последний полный круг</div><div class="stat-value">${last?percent(last.score,90)+'%':'—'}</div><div class="stat-foot">${last?last.score+' из 90 правильных':'Пока нет результатов'}</div></div>
-        <div class="stat"><div class="stat-label">Уверенно выучено</div><div class="stat-value"><strong>${percent(mastered(),90)}%</strong></div><div class="stat-foot">${mastered()} из 90 · два круга подряд</div></div>
-        <div class="stat"><div class="stat-label">Лучший результат</div><div class="stat-value">${best===null?'—':best+'%'}</div><div class="stat-foot">${full.length} полных ${full.length===1?'круг':full.length<5?'круга':'кругов'}</div></div>
+        <div class="stat"><div class="stat-label">Последние 90 ответов</div><div class="stat-value">${rolling.total?rolling.rate+'%':'—'}</div><div class="stat-foot">${rolling.correct} из ${rolling.total} · ${rolling.total<90?'окно заполняется':'скользящая точность'}</div></div>
+        <div class="stat"><div class="stat-label">Всего пройдено форм</div><div class="stat-value"><strong>${state.totalAnswered}</strong></div><div class="stat-foot">Тренировка без финиша</div></div>
+        <div class="stat"><div class="stat-label">Рекорд за последние 90</div><div class="stat-value">${state.bestRolling===null?'—':state.bestRolling+'%'}</div><div class="stat-foot">${state.bestRolling===null?'Появится после 90 ответов':'Лучшее полное окно из 90'}</div></div>
       </section>`;
     }
     function navigation() {
@@ -313,7 +329,7 @@
     }
     function trainView() {
       const s=state.session;
-      if(!s) return `<section class="card"><h2>Начнём тренировку</h2><p class="muted">Один круг — 90 случайных вопросов с четырьмя вариантами ответа.</p><button class="btn primary" data-action="start-full">Начать круг из 90 вопросов →</button></section>`;
+      if(!s) return `<section class="card"><h2>Начнём тренировку</h2><p class="muted">Один круг — 90 случайных вопросов с четырьмя вариантами ответа.</p><button class="btn primary" data-action="start-full">Начать тренировку →</button></section>`;
       if(s.complete) return completedView(s);
       const id=s.order[s.idx], {verb,tense,person}=details(id);
       const answer=s.answers[id], n=Object.keys(s.answers).length, done=resultOf(s), remaining=s.order.length-s.idx;
@@ -322,15 +338,16 @@
         const symbol=answer && choice===form(id) ? '<span class="marker" aria-hidden="true">✓</span>' : answer && choice===answer.selected ? '<span class="marker" aria-hidden="true">✕</span>' : '';
         return `<button class="option${mark}" data-choice="${i}" ${answer?'disabled':''} aria-label="Вариант ${i+1}: ${choice}"><span class="letter">${i+1}</span><span class="word">${choice}</span>${symbol}</button>`;
       }).join('');
-      const label=s.mode==='full'?'Полный круг · 90 форм':'Повторение ошибок';
+      const label=s.mode==='full'?'Бесконечная тренировка · 90 форм по кругу':'Повторение ошибок';
+      const rolling=rollingScore();
       return `<section class="card">
-        <div class="card-title-row"><div><h2>Выбери правильную форму</h2><div class="muted" style="font-size:13px">${label}</div></div><span class="pill">Вопрос ${s.idx+1} / ${s.order.length}</span></div>
-        <div class="progress-meta"><span>Пройдено: ${n} из ${s.order.length}</span><span>Правильно: ${done}${n?' ('+percent(done,n)+'%)':''}</span></div>
-        <div class="progress-track" role="progressbar" aria-valuenow="${n}" aria-valuemin="0" aria-valuemax="${s.order.length}" aria-label="Прогресс раунда"><div class="progress-bar" style="width:${percent(n,s.order.length)}%"></div></div>
+        <div class="card-title-row"><div><h2>Выбери правильную форму</h2><div class="muted" style="font-size:13px">${label}</div></div><span class="pill">${s.mode==='full'?'Вопрос '+(state.totalAnswered+(answer?0:1)):'Вопрос '+(s.idx+1)+' / '+s.order.length}</span></div>
+        <div class="progress-meta"><span>Пройдено: ${s.mode==='full'?state.totalAnswered:n}</span><span>${s.mode==='full'?'Последние '+rolling.total+': '+rolling.rate+'%':'Правильно: '+done+' ('+percent(done,n)+'%)'}</span></div>
+        <div class="progress-track" role="progressbar" aria-valuenow="${s.mode==='full'?rolling.rate:percent(done,n)}" aria-valuemin="0" aria-valuemax="100" aria-label="Процент правильных ответов"><div class="progress-bar" style="width:${s.mode==='full'?rolling.rate:percent(done,n)}%"></div></div>
         <div class="question"><div class="eyebrow">Quina és la forma correcta?</div><div class="verb">${VERBS[verb].name}</div><div class="chips"><span class="chip">${TENSES[tense]}</span><span class="chip">${PERSONS[person]}</span></div></div>
         <div class="options">${opts}</div>
         ${answer?`<div class="feedback ${answer.correct?'good':'bad'}" role="status">${answer.correct?'<img class="answer-mascot" src="./guinea-pig.png" width="76" height="72" alt="Морская свинка радуется правильному ответу">':''}<div><strong>${answer.correct?'✓ Правильно!':'✕ Правильный ответ: '+form(id)}</strong>${VERBS[verb].name.toLowerCase()} · ${TENSES[tense]} · ${PERSONS[person]} → ${form(id)}</div></div>`:''}
-        <div class="actions"><button class="btn quiet" data-action="start-full">↻ Начать новый круг</button>${s.mode==='full'&&state.lastMistakes.length?`<button class="btn secondary" data-action="review">Ошибки прошлого круга (${state.lastMistakes.length})</button>`:''}${answer?`<button class="btn primary" data-action="next">${remaining===1?'Завершить раунд':'Следующий вопрос'} →</button>`:''}</div>
+        <div class="actions"><button class="btn quiet" data-action="start-full">↻ Перемешать вопросы</button>${s.mode==='full'&&state.lastMistakes.length?`<button class="btn secondary" data-action="review">Ошибки прошлого круга (${state.lastMistakes.length})</button>`:''}${answer?`<button class="btn primary" data-action="next">${s.mode==='review'&&remaining===1?'Завершить повторение':'Следующий вопрос'} →</button>`:''}</div>
         <p class="help">Быстрые клавиши: 1–4 для ответа, Enter для следующего вопроса. Результаты сохраняются автоматически.</p>
       </section>`;
     }
@@ -343,7 +360,7 @@
         <h2>${full?(reached?'Цель 90% достигнута!':'Раунд завершён!'):'Повторение завершено!'}</h2>
         <p>${message}</p>
         <div class="completion-grid"><div><strong>${r.score}</strong><span>Правильно</span></div><div><strong>${r.mistakes.length}</strong><span>Ошибок</span></div><div><strong>${mastered()} / 90</strong><span>Уверенно выучено</span></div></div>
-        <div class="center-actions">${r.mistakes.length?`<button class="btn secondary" data-action="review-current">Повторить ${r.mistakes.length} ошибок</button>`:''}<button class="btn primary" data-action="start-full">Новый круг из 90 →</button><button class="btn quiet" data-tab="stats">Посмотреть статистику</button></div>
+        <div class="center-actions">${r.mistakes.length?`<button class="btn secondary" data-action="review-current">Повторить ${r.mistakes.length} ошибок</button>`:''}<button class="btn primary" data-action="start-full">Продолжить тренировку →</button><button class="btn quiet" data-tab="stats">Посмотреть статистику</button></div>
         <div class="note" style="text-align:left;margin:26px 0 0"><strong>Что означают проценты?</strong> Результат раунда — доля верных ответов с первой попытки. Показатель «уверенно выучено» увеличивается, только если форма верно выбрана в двух последовательных <em>полных</em> кругах. Повторение ошибок не меняет этот показатель.</div>
       </section>`;
     }
@@ -360,13 +377,13 @@
       if(last) {
         matrix=`<div class="table-scroll"><table class="matrix"><thead><tr><th>Глагол</th>${TENSES.map(t=>`<th>${t}</th>`).join('')}</tr></thead><tbody>${VERBS.map((v,vi)=>`<tr><td>${v.name}</td>${TENSES.map((t,ti)=>{const n=Array.from({length:6},(_,pi)=>vi*30+ti*6+pi).filter(id=>last.answers[id]?.correct).length;const rate=percent(n,6);return `<td class="${rate>=85?'high':rate>=65?'medium':'low'}">${n}/6</td>`;}).join('')}</tr>`).join('')}</tbody></table></div>`;
       }
-      return `<section class="card"><h2>История результатов</h2><p class="section-lead">Каждый столбик — точность одного полного круга из 90 вопросов. Цель — 90% и выше (81/90).</p>${recent.length?`<div class="bars">${bars}</div><p class="help">Показаны последние ${recent.length} из ${full.length} полных кругов.</p>`:'<div class="empty">Пока нет завершённых кругов. Начните тренировку!</div>'}</section>
+      return `<section class="card"><h2>История результатов</h2><p class="section-lead">Каждый столбик — завершённый блок из 90 вопросов. Блоки сохраняются автоматически, тренировка продолжается. Текущая точность наверху — по последним 90 ответам.</p>${recent.length?`<div class="bars">${bars}</div><p class="help">Показаны последние ${recent.length} из ${full.length} полных кругов.</p>`:'<div class="empty">Пока нет завершённых кругов. Начните тренировку!</div>'}</section>
       <section class="card"><h2>Насколько хорошо выучены формы?</h2><p class="section-lead">Чтобы форма считалась выученной, нужно ответить на неё правильно в двух полных кругах подряд.</p>
         <div class="stats-detail"><div class="small-panel"><h3>✓ Выучено</h3><div class="count" style="color:var(--green)">${masteredCount}</div><span class="muted" style="font-size:12px">2+ круга подряд</span></div><div class="small-panel"><h3>◐ Закрепляется</h3><div class="count" style="color:var(--accent)">${one}</div><span class="muted" style="font-size:12px">1 правильный круг</span></div><div class="small-panel"><h3>○ Нужно повторить</h3><div class="count" style="color:var(--red)">${unseen}</div><span class="muted" style="font-size:12px">Нет серии</span></div></div>
         <div class="progress-track" style="margin-top:20px"><div class="progress-bar" style="width:${percent(masteredCount,90)}%;background:var(--green)"></div></div><div class="progress-meta" style="margin-top:10px"><span>${masteredCount} / 90 выучено</span><strong>${percent(masteredCount,90)}%</strong></div>
       </section>
       <section class="card"><h2>Последний полный круг: где ошибки?</h2><p class="section-lead">Сколько правильных ответов из 6 было по каждому глаголу и времени.</p>${matrix}
-      <div class="actions"><button class="btn primary" data-action="start-full">Новый полный круг →</button>${state.lastMistakes.length?`<button class="btn secondary" data-action="review">Повторить ошибки (${state.lastMistakes.length})</button>`:''}</div></section>
+      <div class="actions"><button class="btn primary" data-action="start-full">Вернуться к тренировке →</button>${state.lastMistakes.length?`<button class="btn secondary" data-action="review">Повторить ошибки (${state.lastMistakes.length})</button>`:''}</div></section>
       <section class="card"><h2>Управление данными</h2><p class="section-lead">История хранится локально в этом браузере. При очистке данных сайта она может исчезнуть.</p><button class="btn danger" data-action="reset">Удалить всю статистику</button></section>`;
     }
     function referenceView() {
@@ -381,7 +398,7 @@
       // Replacing the focused answer button can reset the viewport on mobile.
       const scrollPosition=preserveScroll?{left:window.scrollX,top:window.scrollY}:null;
       const finished=state.session?.complete;
-      app.innerHTML=`<section class="intro"><h1>90 форм. Одна понятная цель.</h1><p>Тренируйте <strong>estar, anar и posar</strong> в пяти временах. После каждого круга узнавайте процент правильных ответов и отслеживайте, что уже закрепилось.</p></section>
+      app.innerHTML=`<section class="intro"><h1>90 форм. Одна понятная цель.</h1><p>Тренируйте <strong>estar, anar и posar</strong> в пяти временах. Вопросы повторяются бесконечно. Точность считается по последним 90 ответам и меняется с каждым ответом.</p></section>
         ${cards()}${navigation()}${tab==='train'?trainView():tab==='stats'?statsView():referenceView()}`;
       document.title=finished&&tab==='train'?'Результат '+percent(state.session.summary.score,state.session.summary.total)+'% · Verbs Lab':'Verbs · Тренажёр валенсийского';
       updateStorageStatus();
@@ -409,6 +426,17 @@
       else if(event.key==='Enter'&&s.answers[s.order[s.idx]]){event.preventDefault();next();}
     });
     state=load();
+    // Upgrade existing progress while preserving history and active questions.
+    if(!Array.isArray(state.recentAnswers)) {
+      const full=state.history.filter(r=>r.mode==='full');
+      const active=state.session?.mode==='full'&&!state.session.complete?state.session:null;
+      const previous=full.length?Object.values(full[full.length-1].answers).map(a=>!!a.correct):[];
+      const current=active?active.order.filter(id=>active.answers[id]).map(id=>!!active.answers[id].correct):[];
+      state.recentAnswers=[...previous,...current].slice(-90);
+      state.totalAnswered=full.reduce((sum,r)=>sum+r.total,0)+current.length;
+      state.bestRolling=full.length?Math.max(...full.map(r=>percent(r.score,r.total))):null;
+    }
+    if(state.session?.mode==='full'&&state.session.complete) state.session=null;
     if(!state.session || !Array.isArray(state.session.order) || !Array.isArray(state.session.options && Object.keys(state.session.options))) {
       state.session=null;
       begin('full',IDS);
