@@ -75,6 +75,8 @@
     .option .marker{margin-left:auto;font-weight:900;color:var(--green);font-size:18px}
     .option.wrong .marker{color:var(--red)}
     .feedback{margin-top:17px;padding:14px 16px;border-radius:12px;font-size:14px}
+    .feedback{display:flex;align-items:center;gap:14px}
+    .answer-mascot{width:76px;height:72px;object-fit:contain;image-rendering:pixelated;flex-shrink:0}
     .feedback.good{background:var(--green-bg);color:#13684f}
     .feedback.bad{background:var(--red-bg);color:#9e3c44}
     .feedback strong{display:block;font-size:15px;margin-bottom:2px}
@@ -327,7 +329,7 @@
         <div class="progress-track" role="progressbar" aria-valuenow="${n}" aria-valuemin="0" aria-valuemax="${s.order.length}" aria-label="Прогресс раунда"><div class="progress-bar" style="width:${percent(n,s.order.length)}%"></div></div>
         <div class="question"><div class="eyebrow">Quina és la forma correcta?</div><div class="verb">${VERBS[verb].name}</div><div class="chips"><span class="chip">${TENSES[tense]}</span><span class="chip">${PERSONS[person]}</span></div></div>
         <div class="options">${opts}</div>
-        ${answer?`<div class="feedback ${answer.correct?'good':'bad'}" role="status"><strong>${answer.correct?'✓ Правильно!':'✕ Правильный ответ: '+form(id)}</strong>${VERBS[verb].name.toLowerCase()} · ${TENSES[tense]} · ${PERSONS[person]} → ${form(id)}</div>`:''}
+        ${answer?`<div class="feedback ${answer.correct?'good':'bad'}" role="status">${answer.correct?'<img class="answer-mascot" src="./guinea-pig.png" width="76" height="72" alt="Морская свинка радуется правильному ответу">':''}<div><strong>${answer.correct?'✓ Правильно!':'✕ Правильный ответ: '+form(id)}</strong>${VERBS[verb].name.toLowerCase()} · ${TENSES[tense]} · ${PERSONS[person]} → ${form(id)}</div></div>`:''}
         <div class="actions"><button class="btn quiet" data-action="start-full">↻ Начать новый круг</button>${s.mode==='full'&&state.lastMistakes.length?`<button class="btn secondary" data-action="review">Ошибки прошлого круга (${state.lastMistakes.length})</button>`:''}${answer?`<button class="btn primary" data-action="next">${remaining===1?'Завершить раунд':'Следующий вопрос'} →</button>`:''}</div>
         <p class="help">Быстрые клавиши: 1–4 для ответа, Enter для следующего вопроса. Результаты сохраняются автоматически.</p>
       </section>`;
